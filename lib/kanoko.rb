@@ -3,7 +3,7 @@ require 'kanoko/configure'
 
 module Kanoko
   # example:
-  #   Kanoko.configure.resource_host = "http://example.com"
+  #   Kanoko.configure.kanoko_host = "http://example.com"
   #   p Kanoko.configure #=> #<Kanoko::Configure ...>
   def configure
     @configure ||= Configure.new
@@ -15,10 +15,10 @@ module Kanoko
   end
 
   def url_for(func, args, src)
-    if configure.resource_host.nil?
-      fail ConfigureError, "`resource_host' must be set"
+    if configure.kanoko_host.nil?
+      fail ConfigureError, "`kanoko_host' must be set"
     end
-    "#{configure.resource_host}#{make_path(func, args, src)}"
+    "#{configure.kanoko_host}#{make_path(func, args, src)}"
   end
   module_function :url_for
 

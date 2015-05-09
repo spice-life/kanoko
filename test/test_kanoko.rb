@@ -5,7 +5,7 @@ class TestKanoko < Minitest::Test
   def setup
     Kanoko.configure.digest_func = "sha1"
     Kanoko.configure.secret_key = "test"
-    Kanoko.configure.resource_host = "http://example.com"
+    Kanoko.configure.kanoko_host = "http://example.com"
   end
 
   def change_hash_proc(hash_proc)

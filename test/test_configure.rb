@@ -6,17 +6,17 @@ class TestKanokoConfigure < Minitest::Test
     @config = Kanoko::Configure.new
   end
 
-  def test_resource_host
-    assert_raises(Kanoko::ConfigureError) { @config.resource_host = "/example.com" }
+  def test_kanoko_host
+    assert_raises(Kanoko::ConfigureError) { @config.kanoko_host = "/example.com" }
 
-    @config.resource_host = "example.com"
-    assert_equal "http://example.com", @config.resource_host
+    @config.kanoko_host = "example.com"
+    assert_equal "http://example.com", @config.kanoko_host
 
-    @config.resource_host = "http://example.com"
-    assert_equal "http://example.com", @config.resource_host
+    @config.kanoko_host = "http://example.com"
+    assert_equal "http://example.com", @config.kanoko_host
 
-    @config.resource_host = "https://example.com"
-    assert_equal "https://example.com", @config.resource_host
+    @config.kanoko_host = "https://example.com"
+    assert_equal "https://example.com", @config.kanoko_host
   end
 
   def test_hash_proc_by_default_error

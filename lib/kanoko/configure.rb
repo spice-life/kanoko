@@ -6,20 +6,20 @@ module Kanoko
   class Configure
     attr_accessor :digest_func, :secret_key, :hash_proc
 
-    # resource_host expect String
+    # kanoko_host expect String
     # digest_func expect String
     # secret_key expect String
     # hash_proc expect Proc
     #
     # example:
     #   Kanoko.configure.tap do |c|
-    #     c.resource_host = "http://example.com"
+    #     c.kanoko_host = "http://example.com"
     #     c.digest_func = "sha1"
     #     c.secret_key = "secret"
     #   end
     #   Kanoko.url_for(:resize, "100x100") #=> "http://example.com/.../.../..."
     def initialize
-      @resource_host = nil
+      @kanoko_host = nil
       @digest_func = nil
       @secret_key = nil
       @hash_proc = ->(*args){
@@ -34,12 +34,12 @@ module Kanoko
       }
     end
 
-    def resource_host=(host)
-      @resource_host = normalize_url(host)
+    def kanoko_host=(host)
+      @kanoko_host = normalize_url(host)
     end
 
-    def resource_host
-      @resource_host
+    def kanoko_host
+      @kanoko_host
     end
 
     private
@@ -53,7 +53,7 @@ module Kanoko
       when %r{\A//}
         "http:#{host}"
       else
-        fail ConfigureError, "invalid resource_host `#{host}'"
+        fail ConfigureError, "invalid kanoko_host `#{host}'"
       end
     end
   end
