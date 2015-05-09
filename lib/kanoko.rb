@@ -31,7 +31,7 @@ module Kanoko
 
   def make_path(func, args, src)
     hash = make_hash(func, args, src)
-    "/#{hash}/#{[func, args, src].map{|i| URI.encode_www_form_component(i)}.join('/')}"
+    "/#{hash}/#{[func, args].map{|i| URI.encode_www_form_component(i)}.join('/')}/#{src}"
   end
   module_function :make_path
 end
