@@ -20,8 +20,8 @@ module Kanoko
     #   Kanoko.url_for(:resize, "100x100") #=> "http://example.com/.../.../..."
     def initialize
       @kanoko_host = nil
-      @digest_func = nil
-      @secret_key = nil
+      @digest_func = ENV['KANOKO_DIGEST_FUNC']
+      @secret_key = ENV['KANOKO_SECRET_KEY']
       @hash_proc = ->(*args){
         if @digest_func.nil? || @secret_key.nil?
           fail ConfigureError, "`digest_func' and `secret_key' must be set"
