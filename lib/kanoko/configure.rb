@@ -12,7 +12,7 @@ module Kanoko
     # hash_proc expect Proc
     #
     # example:
-    #   Kanoko.configure.tap do |c|
+    #   Kanoko.configure do |c|
     #     c.kanoko_host = "http://example.com"
     #     c.digest_func = "sha1"
     #     c.secret_key = "secret"

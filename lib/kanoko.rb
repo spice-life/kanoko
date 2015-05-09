@@ -7,6 +7,11 @@ module Kanoko
   #   p Kanoko.configure #=> #<Kanoko::Configure ...>
   def configure
     @configure ||= Configure.new
+    if block_given?
+      yield @configure
+    else
+      @configure
+    end
   end
   module_function :configure
 
