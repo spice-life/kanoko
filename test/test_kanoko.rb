@@ -5,7 +5,6 @@ class TestKanoko < Minitest::Test
   def setup
     Kanoko.configure.digest_func = "sha1"
     Kanoko.configure.secret_key = "test"
-    Kanoko.configure.kanoko_host = "http://example.com"
   end
 
   def change_hash_proc(hash_proc)
@@ -25,10 +24,10 @@ class TestKanoko < Minitest::Test
     assert_equal "ok", Kanoko.configure.digest_func
   end
 
-  def test_url_for_with_default_hash_proc
+  def test_path_for_with_default_hash_proc
     change_hash_proc(proc{ "aaa" }) do
-      assert_equal "http://example.com/aaa/test_func/test_args/test_path", Kanoko.url_for(:test_func, "test_args", "test_path")
-      assert_equal "http://example.com/aaa/test_func/%2F%3F-_%3D%21%40%23%3C%3E%5C//?-_=!@#<>\\", Kanoko.url_for(:test_func, "/?-_=!@#<>\\", "/?-_=!@#<>\\")
+      assert_equal "/aaa/test_func/test_args/test_path", Kanoko.path_for(:test_func, "test_args", "test_path")
+      assert_equal "/aaa/test_func/%2F%3F-_%3D%21%40%23%3C%3E%5C//?-_=!@#<>\\", Kanoko.path_for(:test_func, "/?-_=!@#<>\\", "/?-_=!@#<>\\")
     end
   end
 
