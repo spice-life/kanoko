@@ -52,9 +52,7 @@ module Kanoko
         if res.nil?
           return 404
         end
-        res.each do |key, value|
-          headers[key] ||= value
-        end
+        after_response res
 
         Tempfile.open("src") do |src_file|
           src_file.write res.body
@@ -116,6 +114,12 @@ module Kanoko
           end
           logger.error "Can not get image from '#{uri}' with #{e.message}"
           nil
+        end
+      end
+
+      def after_response(res)
+        res.each do |key, value|
+          headers[key] ||= value
         end
       end
     end
