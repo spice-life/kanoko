@@ -34,6 +34,14 @@ module Kanoko
       }
     end
 
+    # for make url to kanoko application
+    # example:
+    #   kanoko_host = "http://example.com"
+    #   p kanoko_host #=> "http://example.com"
+    #   kanoko_host = "example.com"
+    #   p kanoko_host #=> "http://example.com"
+    #   kanoko_host = "//example.com"
+    #   p kanoko_host #=> "http://example.com"
     def kanoko_host=(host)
       @kanoko_host = normalize_url(host)
     end

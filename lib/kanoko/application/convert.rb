@@ -3,7 +3,7 @@ require 'net/http'
 require 'tempfile'
 require 'kanoko'
 
-# This is a experimental implementation.
+# This is an experimental implementation.
 # You can set configure and other.
 # This application receve url make by Kanoko.url_for().
 # You can choice function that image processing.
