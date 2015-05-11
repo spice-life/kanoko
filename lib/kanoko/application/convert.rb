@@ -52,6 +52,9 @@ module Kanoko
         if res.nil?
           return 404
         end
+        res.each do |key, value|
+          headers[key] ||= value
+        end
 
         Tempfile.open("src") do |src_file|
           src_file.write res.body
