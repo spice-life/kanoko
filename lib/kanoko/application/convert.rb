@@ -54,7 +54,7 @@ module Kanoko
         end
 
         Tempfile.open("src") do |src_file|
-          src_file.write res
+          src_file.write res.body
           src_file.fdatasync
           Tempfile.open("dst") do |dst_file|
             default_env = {"OMP_NUM_THREADS" => "1"}
@@ -104,7 +104,7 @@ module Kanoko
             http.request(req)
           end
           res.value
-          res.body
+          res
         rescue => e
           if 1 < retries
             retries -= 1
