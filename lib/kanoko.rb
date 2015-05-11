@@ -3,7 +3,7 @@ require 'kanoko/configure'
 
 module Kanoko
   # example:
-  #   Kanoko.configure.kanoko_host = "http://example.com"
+  #   Kanoko.configure.digest_func = "sha1"
   #   p Kanoko.configure #=> #<Kanoko::Configure ...>
   def configure
     @configure ||= Configure.new
