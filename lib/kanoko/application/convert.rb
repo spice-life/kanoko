@@ -35,13 +35,7 @@ module Kanoko
         hash = params[:hash]
         func = params[:func]
         args = params[:args]
-        path = params[:splat].first
-
-        src_path = if request.query_string != ""
-          "#{path}?#{request.query_string}"
-        else
-          path
-        end
+        src_path = env["REQUEST_URI"].sub(%r{/.*?/.*?/.*?/(.*)}, '\1')
 
         unless hash == Kanoko.make_hash(func, args, src_path)
           logger.error "hash check failed #{[func, args, src_path]}"
