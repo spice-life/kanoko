@@ -42,7 +42,9 @@ module Kanoko
           return 400
         end
 
-        res = http_get(URI.parse("#{(request.secure? ? 'https' : 'http')}://#{src_path}"))
+        uri = URI.parse(src_path)
+        uri = URI.parse("#{(request.secure? ? 'https' : 'http')}://#{src_path}") unless uri.scheme
+        res = http_get(uri)
         if res.nil?
           return 404
         end
