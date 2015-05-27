@@ -113,7 +113,12 @@ module Kanoko
 
       def after_response(res)
         res.each do |key, value|
-          headers[key] ||= value
+          case key.downcase
+          when "status"
+            next
+          else
+            headers[key] ||= value
+          end
         end
       end
     end
