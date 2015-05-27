@@ -58,6 +58,7 @@ module Kanoko
             when :crop
               system(default_env,
                 'convert',
+                '-define', "jpeg:size=#{args}",
                 '-thumbnail', "#{args}^",
                 '-gravity', 'north',
                 '-extent', args,
@@ -68,6 +69,7 @@ module Kanoko
             when :resize
               system(default_env,
                 'convert',
+                '-define', "jpeg:size=#{args}",
                 '-thumbnail', args,
                 '-depth', '8',
                 src_file.path, dst_file.path)
