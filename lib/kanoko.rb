@@ -1,5 +1,7 @@
 require 'uri'
 require 'kanoko/configure'
+require 'kanoko/errors'
+require 'kanoko/version'
 
 module Kanoko
   # example:
