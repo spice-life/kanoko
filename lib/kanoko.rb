@@ -20,6 +20,7 @@ module Kanoko
   def configure=(value)
     @configure = value
   end
+  module_function :configure=
 
   def path_for(*function, src)
     hash = make_hash(*function, src)
