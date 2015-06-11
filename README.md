@@ -3,6 +3,8 @@ kanoko
 
 [![Build Status](https://travis-ci.org/spice-life/kanoko.svg?branch=master)](https://travis-ci.org/spice-life/kanoko)
 
+![logo](https://raw.githubusercontent.com/spice-life/kanoko/master/logo.png)
+
 **kanoko** is an active image generate application.
 
 # Quick Start
