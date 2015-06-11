@@ -1,4 +1,3 @@
-require 'digest/sha1'
 require 'stringio'
 require 'minitest/autorun'
 require "rack/test"
