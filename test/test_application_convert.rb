@@ -1,6 +1,8 @@
 require 'digest/sha1'
+require 'stringio'
 require 'minitest/autorun'
 require "rack/test"
+require "exifr"
 require "kanoko/application/convert"
 
 class TestKanokoApplicationConvert < Minitest::Test
@@ -20,26 +22,32 @@ class TestKanokoApplicationConvert < Minitest::Test
     TestApp.new
   end
 
-  def assert_digest(expected, actual)
-    assert_equal Digest::SHA1.hexdigest(expected), Digest::SHA1.hexdigest(actual)
-  end
-
   def setup
     ENV['RACK_ENV'] = 'test'
     Kanoko.configure.digest_func = "sha1"
     Kanoko.configure.secret_key = "test"
   end
 
+  def assert_jpeg(expected, actual)
+    expected_exif = EXIFR::JPEG.new(StringIO.new(expected))
+    actual_exif = EXIFR::JPEG.new(StringIO.new(actual))
+    assert_equal expected_exif.to_hash, actual_exif.to_hash
+  end
+
   def test_resize
     url = Kanoko.path_for(:resize, "10x10", "src.jpg")
     get url, {}, {"REQUEST_URI" => url}
-    assert_digest File.read("test/resize.jpg"), last_response.body
+    assert last_response.ok?
+    assert 0 < last_response.body.length
+    assert_jpeg File.read("test/resize.jpg"), last_response.body
   end
 
   def test_resize_and_crop
     url = Kanoko.path_for(:resize, "10x10", :crop, "5x5+1+1", "src.jpg")
     get url, {}, {"REQUEST_URI" => url}
-    assert_digest File.read("test/resize_and_crop.jpg"), last_response.body
+    assert last_response.ok?
+    assert 0 < last_response.body.length
+    assert_jpeg File.read("test/resize_and_crop.jpg"), last_response.body
   end
 
   def test_not_found
