@@ -21,9 +21,9 @@ module Kanoko
     @configure = value
   end
 
-  def path_for(func, args, src)
-    hash = make_hash(func, args, src)
-    "/#{hash}/#{[func, args].map{|i| URI.encode_www_form_component(i)}.join('/')}/#{src}"
+  def path_for(*function, src)
+    hash = make_hash(*function, src)
+    "/#{hash}/#{function.map{ |i| URI.encode_www_form_component(i) }.join('/')}/#{src}"
   end
   module_function :path_for
 

@@ -31,14 +31,22 @@ require 'kanoko'
 module Kanoko
   module Application
     class Convert < Sinatra::Application
-      get '/:hash/:func/:args/*' do
+      # /123abc456def=/resize/200x200/crop/100x100/path/to/src
+      get '/:hash/*' do
+        request_uri = URI.parse env["REQUEST_URI"]
         hash = params[:hash]
-        func = params[:func]
-        args = params[:args]
-        src_path = env["REQUEST_URI"].sub(%r{/.*?/.*?/.*?/(.*)}, '\1')
+        unless params[:splat]
+          logger.error "invalid url #{request_uri}"
+          return 400
+        end
+        splat = params[:splat][0]
+        function = Function.new splat
+        hint_src = splat[function.to_path.length..-1]
+        hint_index = request_uri.to_s.index(hint_src)
+        src_path = request_uri.to_s[hint_index..-1]
 
-        unless hash == Kanoko.make_hash(func, args, src_path)
-          logger.error "hash check failed #{[func, args, src_path]}"
+        unless hash == Kanoko.make_hash(*(function.to_a.flatten), src_path)
+          logger.error "hash check failed #{[*(function.to_a.flatten), src_path]}"
           return 400
         end
 
@@ -51,38 +59,59 @@ module Kanoko
         Tempfile.open("src") do |src_file|
           src_file.write res.body
           src_file.fdatasync
+
           Tempfile.open("dst") do |dst_file|
             default_env = {"OMP_NUM_THREADS" => "1"}
-            result = case func.to_sym
+            command = 'convert'
+            default_options = [
+              '-depth', '8'
+            ]
+            options = []
 
-            when :crop
-              system(default_env,
-                'convert',
-                '-define', "jpeg:size=#{args}",
-                '-thumbnail', "#{args}^",
-                '-gravity', 'north',
-                '-extent', args,
-                '-background', 'transparent',
-                '-depth', '8',
-                src_file.path, dst_file.path)
+            function.each do |name, arg|
+              func_options = case name.to_sym
+                when :crop
+                  [
+                    '-crop', arg
+                  ]
 
-            when :resize
-              system(default_env,
-                'convert',
-                '-define', "jpeg:size=#{args}",
-                '-thumbnail', args,
-                '-depth', '8',
-                src_file.path, dst_file.path)
+                when :fill
+                  [
+                    '-gravity', 'north',
+                    '-extent', arg,
+                    '-background', 'transparent',
+                  ]
 
-            else
-              logger.error "undefined func #{func}"
-              return 400
+                when :resize
+                  [
+                    '-define', "jpeg:size=#{arg}",
+                    '-thumbnail', arg,
+                  ]
+
+                else
+                  logger.error "undefined func #{name}"
+                  return 400
+                end
+
+              options.concat func_options
             end
+
+            system_command = [
+              default_env,
+              command,
+              default_options,
+              options,
+              src_file.path,
+              dst_file.path
+            ].flatten
+
+            result = system *system_command
 
             unless result
               logger.error "command fail $?=#{$?.inspect}"
               return 500
             end
+
             dst_file.read
           end
         end
@@ -126,3 +155,5 @@ module Kanoko
     end
   end
 end
+
+require 'kanoko/application/convert/function'

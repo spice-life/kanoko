@@ -26,8 +26,14 @@ class TestKanoko < Minitest::Test
 
   def test_path_for_with_default_hash_proc
     change_hash_proc(proc{ "aaa" }) do
-      assert_equal "/aaa/test_func/test_args/test_path", Kanoko.path_for(:test_func, "test_args", "test_path")
-      assert_equal "/aaa/test_func/%2F%3F-_%3D%21%40%23%3C%3E%5C//?-_=!@#<>\\", Kanoko.path_for(:test_func, "/?-_=!@#<>\\", "/?-_=!@#<>\\")
+      path = Kanoko.path_for(:test_func, "test_args", "test_path")
+      assert_equal "/aaa/test_func/test_args/test_path", path
+
+      path = Kanoko.path_for(:test_func, "/?-_=!@#<>\\", "/?-_=!@#<>\\")
+      assert_equal "/aaa/test_func/%2F%3F-_%3D%21%40%23%3C%3E%5C//?-_=!@#<>\\", path
+
+      path = Kanoko.path_for(:test_func, "test_args", :test_func2, "test_args2", "test_path")
+      assert_equal "/aaa/test_func/test_args/test_func2/test_args2/test_path", path
     end
   end
 
