@@ -31,6 +31,7 @@ require 'kanoko'
 module Kanoko
   module Application
     class Convert < Sinatra::Application
+
       # /123abc456def=/resize/200x200/crop/100x100/path/to/src
       get '/:hash/*' do
         request_uri = URI.parse(env["REQUEST_URI"] || "/#{params[:captures].join('/')}")
@@ -39,14 +40,21 @@ module Kanoko
           logger.error "invalid url #{request_uri}"
           return 400
         end
+
         splat = params[:splat][0]
-        function = Function.new splat
-        hint_src = splat[function.to_path.length..-1]
+        argument = ArgumentParser.new splat
+
+        hint_src = splat[argument.path.length..-1]
+        unless hint_src
+          logger.error "invalid url #{request_uri}"
+          return 400
+        end
+
         hint_index = request_uri.to_s.index(hint_src)
         src_path = request_uri.to_s[hint_index..-1]
 
-        unless hash == Kanoko.make_hash(*(function.to_a.flatten), src_path)
-          logger.error "hash check failed #{[*(function.to_a.flatten), src_path]}"
+        unless hash == Kanoko.make_hash(*(argument.to_a.flatten), src_path)
+          logger.error "hash check failed #{[*(argument.to_a.flatten), src_path]}"
           return 400
         end
 
@@ -61,45 +69,14 @@ module Kanoko
           src_file.fdatasync
 
           Tempfile.open("dst") do |dst_file|
-            options = []
-
-            function.each do |name, arg|
-              func_options = case name.to_sym
-                when :crop
-                  [
-                    '-crop', arg
-                  ]
-
-                when :fill
-                  [
-                    '-gravity', 'north',
-                    '-extent', arg,
-                    '-background', 'transparent',
-                  ]
-
-                when :resize
-                  [
-                    '-define', "jpeg:size=#{arg}",
-                    '-thumbnail', arg,
-                  ]
-
-                else
-                  logger.error "undefined func #{name}"
-                  return 400
-                end
-
-              options.concat func_options
-            end
-
             system_command = [
-              options,
               {"OMP_NUM_THREADS" => "1"},
               'convert',
               '-depth', '8',
+              argument.options,
               src_file.path,
               dst_file.path
             ].flatten
-
             result = system *system_command
 
             unless result
@@ -151,4 +128,4 @@ module Kanoko
   end
 end
 
-require 'kanoko/application/convert/function'
+require 'kanoko/application/convert/argument_parser'
