@@ -33,7 +33,7 @@ module Kanoko
     class Convert < Sinatra::Application
       # /123abc456def=/resize/200x200/crop/100x100/path/to/src
       get '/:hash/*' do
-        request_uri = URI.parse env["REQUEST_URI"]
+        request_uri = URI.parse(env["REQUEST_URI"] || "/#{params[:captures].join('/')}")
         hash = params[:hash]
         unless params[:splat]
           logger.error "invalid url #{request_uri}"
