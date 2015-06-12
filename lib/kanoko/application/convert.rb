@@ -61,11 +61,6 @@ module Kanoko
           src_file.fdatasync
 
           Tempfile.open("dst") do |dst_file|
-            default_env = {"OMP_NUM_THREADS" => "1"}
-            command = 'convert'
-            default_options = [
-              '-depth', '8'
-            ]
             options = []
 
             function.each do |name, arg|
@@ -97,10 +92,10 @@ module Kanoko
             end
 
             system_command = [
-              default_env,
-              command,
-              default_options,
               options,
+              {"OMP_NUM_THREADS" => "1"},
+              'convert',
+              '-depth', '8',
               src_file.path,
               dst_file.path
             ].flatten
