@@ -1,6 +1,17 @@
 module Kanoko
   module Application
     class Convert
+      # You can make customize function.
+      # It just make or overwhrite instance method.
+      # example:
+      #   class Kanoko::Application::Convert::Function
+      #     # get "/new_func/new_value"
+      #     # => add imagemagick option
+      #     # -new-option new_value
+      #     def new_func(arg)
+      #       ['-new-option', arg]
+      #     end
+      #   end
       class Function
         class << self
           def list
