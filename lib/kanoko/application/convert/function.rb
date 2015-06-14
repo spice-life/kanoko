@@ -2,6 +2,12 @@ module Kanoko
   module Application
     class Convert
       class Function
+        class << self
+          def list
+            instance_methods(false)
+          end
+        end
+
         def crop(arg)
           [
             '-crop', arg
