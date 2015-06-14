@@ -124,6 +124,10 @@ module Kanoko
           end
         end
       end
+
+      error 404 do
+        ""
+      end
     end
   end
 end

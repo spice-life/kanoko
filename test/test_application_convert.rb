@@ -64,17 +64,20 @@ class TestKanokoApplicationConvert < Minitest::Test
     path = Kanoko.path_for(:undefined, "10x10", "src.jpg")
     get path
     assert_equal 400, last_response.status
+    assert_equal "", last_response.body
   end
 
   def test_root_not_found
     path = "/"
     get path
     assert_equal 404, last_response.status
+    assert_equal "", last_response.body
   end
 
   def test_invalid_path
     path = "/invalid/path/to/src"
     get path
     assert_equal 400, last_response.status
+    assert_equal "", last_response.body
   end
 end
