@@ -80,4 +80,20 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert_equal 400, last_response.status
     assert_equal "", last_response.body
   end
+
+  class Kanoko::Application::Convert::Function
+    def method_for_500
+      ['-undefined-imagemagick-option']
+    end
+  end
+
+  def test_500
+    path = Kanoko.path_for(:method_for_500, "src.jpg")
+    out, err = capture_subprocess_io do
+      get path
+    end
+    assert_equal 500, last_response.status
+    assert_equal "", last_response.body
+    assert_match /convert: unrecognized option `-undefined-imagemagick-option'/, err
+  end
 end
