@@ -34,8 +34,6 @@ module Kanoko
                 arg = items.shift(method.arity)
                 options.concat method.call(*arg)
                 args.push [id, *arg]
-              else
-                break
               end
             end
             [args, options]
