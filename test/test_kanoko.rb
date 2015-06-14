@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require 'kanoko'
+require 'helper'
 
 class TestKanoko < Minitest::Test
   def setup

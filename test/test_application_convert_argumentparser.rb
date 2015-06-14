@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require "kanoko/application/convert/argument_parser"
+require 'helper'
 
 class TestKanokoApplicationConvertArgumentParser < Minitest::Test
   include Kanoko::Application

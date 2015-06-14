@@ -1,8 +1,4 @@
-require 'stringio'
-require 'minitest/autorun'
-require "rack/test"
-require "exifr"
-require "kanoko/application/convert"
+require 'helper'
 
 class TestKanokoApplicationConvert < Minitest::Test
   include Rack::Test::Methods
@@ -22,7 +18,6 @@ class TestKanokoApplicationConvert < Minitest::Test
   end
 
   def setup
-    ENV['RACK_ENV'] = 'test'
     Kanoko.configure.digest_func = "sha1"
     Kanoko.configure.secret_key = "test"
   end
