@@ -64,11 +64,11 @@ module Kanoko
         end
         after_response res
 
-        Tempfile.open("src") do |src_file|
+        Tempfile.create("src") do |src_file|
           src_file.write res.body
           src_file.fdatasync
 
-          Tempfile.open("dst") do |dst_file|
+          Tempfile.create("dst") do |dst_file|
             system_command = [
               {"OMP_NUM_THREADS" => "1"},
               'convert',
