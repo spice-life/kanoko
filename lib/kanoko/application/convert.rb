@@ -49,11 +49,10 @@ module Kanoko
           logger.error "invalid url #{request_uri}"
           return 400
         end
-
-        hint_index = request_uri.to_s.index(hint_src)
+        hint_index = request_uri.to_s.index(argument.path) + argument.path.length + 1
         src_path = request_uri.to_s[hint_index..-1]
-
-        unless hash == Kanoko.make_hash(*(argument.to_a.flatten), src_path)
+        src_path_unescaped = URI.decode_www_form_component(src_path).force_encoding('UTF-8')
+        unless hash == Kanoko.make_hash(*(argument.to_a.flatten), src_path_unescaped)
           logger.error "hash check failed #{[*(argument.to_a.flatten), src_path]}"
           return 400
         end
