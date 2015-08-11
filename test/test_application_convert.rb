@@ -7,7 +7,8 @@ class TestKanokoApplicationConvert < Minitest::Test
     class ResponseMock < Struct.new(:body)
     end
     def http_get(uri)
-      ResponseMock.new(File.read "test/src.jpg")
+      path = uri.to_s[7..-1] # 7 = 'http://'
+      ResponseMock.new(File.read "test/#{URI.decode_www_form_component(path)}")
     end
     def after_response(res)
     end
@@ -38,6 +39,17 @@ class TestKanokoApplicationConvert < Minitest::Test
 
   def test_resize_and_crop
     path = Kanoko.path_for(:resize, "10x10", :crop, "5x5+1+1", "src.jpg")
+    get path
+    assert last_response.ok?
+    assert 0 < last_response.body.length
+    assert_jpeg File.read("test/resize_and_crop.jpg"), last_response.body
+  end
+
+  def test_escaped_url
+    function = [:resize, "10x10", :crop, "5x5+1+1"]
+    src = "漢字.jpg"
+    hash = Kanoko.make_hash(*function, src)
+    path = "/#{hash}/#{function.map{ |i| URI.encode_www_form_component(i) }.join('/')}/#{URI.encode_www_form_component(src)}"
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length

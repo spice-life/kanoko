@@ -31,32 +31,45 @@ require 'kanoko'
 module Kanoko
   module Application
     class Convert < Sinatra::Application
+      require 'kanoko/application/convert/function'
 
       # /123abc456def=/resize/200x200/crop/100x100/path/to/src
       get '/:hash/*' do
-        request_uri = URI.parse(env["REQUEST_URI"] || "/#{params[:captures].join('/')}")
-        hash = params[:hash]
-        unless params[:splat]
+        # REQUEST_URI dependent on unicorn.
+        # request.path should be use only testing
+        raw_request_uri = env["REQUEST_URI"] || request.path
+        request_params = raw_request_uri.split('/').tap(&:shift)
+        hash = request_params.shift
+        unless 0 < request_params.length
           logger.error "invalid url #{request_uri}"
           return 400
         end
 
-        splat = params[:splat][0]
-        argument = ArgumentParser.new splat
+        list = Kanoko::Application::Convert::Function.list
+        convert_options = []
+        arguments = []
 
-        hint_src = splat[argument.path.length..-1]
-        unless hint_src
-          logger.error "invalid url #{request_uri}"
+        while id = request_params.shift.to_sym
+          if list.include?(id)
+            arguments << id
+            method = Function.new.method(id)
+            arg = request_params.shift(method.arity)
+            arg.map!{|i| URI.decode_www_form_component i}
+            arguments.concat arg if 0 < arg.length
+            convert_options.concat method.call(*arg)
+          else
+            request_params.unshift(id.to_s)
+            break
+          end
+        end
+
+        check_path = request_params.map{ |i| URI.decode_www_form_component(i) }.join('/')
+        unless hash == Kanoko.make_hash(*arguments, check_path)
+          logger.error "hash check failed #{[*arguments, check_path]}"
           return 400
         end
-        hint_index = request_uri.to_s.index(argument.path) + argument.path.length + 1
-        src_path = request_uri.to_s[hint_index..-1]
-        src_path_unescaped = URI.decode_www_form_component(src_path).force_encoding('UTF-8')
-        unless hash == Kanoko.make_hash(*(argument.to_a.flatten), src_path_unescaped)
-          logger.error "hash check failed #{[*(argument.to_a.flatten), src_path]}"
-          return 400
-        end
 
+        src_path = request_params.join('/')
         res = http_get(URI.parse("#{(request.secure? ? 'https' : 'http')}://#{src_path}"))
         if res.nil?
           return 404
@@ -72,7 +85,7 @@ module Kanoko
               {"OMP_NUM_THREADS" => "1"},
               'convert',
               '-depth', '8',
-              argument.options,
+              convert_options,
               src_file.path,
               dst_file.path
             ].flatten
@@ -130,5 +143,3 @@ module Kanoko
     end
   end
 end
-
-require 'kanoko/application/convert/argument_parser'
