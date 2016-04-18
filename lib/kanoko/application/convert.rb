@@ -34,17 +34,17 @@ module Kanoko
     class Convert < Sinatra::Application
       require 'kanoko/application/convert/function'
 
-      IMAGE_TYPES = MIME::Types.select { |m|
+      IMAGE_TYPES = MIME::Types.select do |m|
         m.media_type == 'image'
-      }
+      end
       TYPE_MAP = IMAGE_TYPES.map { |i|
         [i.to_s, i.preferred_extension]
       }.to_h
-      EXT_MAP = IMAGE_TYPES.each_with_object({}) { |i, h|
-        i.extensions.each { |ext|
+      EXT_MAP = IMAGE_TYPES.each_with_object({}) do |i, h|
+        i.extensions.each do |ext|
           h[ext] = i.to_s
-        }
-      }
+        end
+      end
 
       # /123abc456def=/resize/200x200/crop/100x100/path/to/src
       get '/:hash/*' do
@@ -70,7 +70,7 @@ module Kanoko
             arguments << id
             method = Function.new.method(id)
             arg = request_params.shift(method.arity)
-            arg.map!{|i| URI.decode_www_form_component i}
+            arg.map! { |i| URI.decode_www_form_component i }
             arguments.concat arg if 0 < arg.length
             convert_options.concat method.call(*arg)
           else
@@ -79,7 +79,7 @@ module Kanoko
           end
         end
 
-        check_path = request_params.map{ |i| URI.decode_www_form_component(i) }.join('/')
+        check_path = request_params.map { |i| URI.decode_www_form_component(i) }.join('/')
         unless hash == Kanoko.make_hash(*arguments, check_path)
           logger.error "hash check failed #{[*arguments, check_path]}"
           return 400
@@ -98,19 +98,19 @@ module Kanoko
 
           t = TYPE_MAP[res.content_type]
           src_type = if t
-                       "#{t}:"
-                     else
-                       ""
+            "#{t}:"
+          else
+            ""
                      end
 
           dst_name = if to_ext.nil?
-                       "dst"
-                     else
-                       ["dst", ".#{to_ext}"]
+            "dst"
+          else
+            ["dst", ".#{to_ext}"]
                      end
           Tempfile.create(dst_name) do |dst_file|
             system_command = [
-              {"OMP_NUM_THREADS" => "1"},
+              { "OMP_NUM_THREADS" => "1" },
               'convert',
               '-depth', '8',
               convert_options,
@@ -120,7 +120,7 @@ module Kanoko
             result = system *system_command
 
             unless result
-              logger.error "command fail $?=#{$?.inspect}"
+              logger.error "command fail $?=#{$CHILD_STATUS.inspect}"
               return 500
             end
 

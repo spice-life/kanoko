@@ -10,6 +10,7 @@ class TestKanokoApplicationConvert < Minitest::Test
       path = uri.to_s[7..-1] # 7 = 'http://'
       ResponseMock.new(File.read("test/#{URI.decode_www_form_component(path)}"), "image/jpeg")
     end
+
     def after_response(res)
     end
   end
@@ -51,7 +52,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     function = [:resize, "10x10", :crop, "5x5+1+1"]
     src = "漢字.jpg"
     hash = Kanoko.make_hash(*function, src)
-    path = "/#{hash}/#{function.map{ |i| URI.encode_www_form_component(i) }.join('/')}/#{URI.encode_www_form_component(src)}"
+    path = "/#{hash}/#{function.map { |i| URI.encode_www_form_component(i) }.join('/')}/#{URI.encode_www_form_component(src)}"
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length

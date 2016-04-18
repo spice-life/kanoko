@@ -19,16 +19,18 @@ module Kanoko
     def initialize
       @digest_func = ENV['KANOKO_DIGEST_FUNC']
       @secret_key = ENV['KANOKO_SECRET_KEY']
-      @hash_proc = ->(*args){
+      @hash_proc = lambda do |*args|
         if @digest_func.nil? || @secret_key.nil?
           fail ConfigureError, "`digest_func' and `secret_key' must be set"
         end
         Base64.urlsafe_encode64(
-          OpenSSL::HMAC.digest @digest_func,
-          @secret_key,
-          args.map(&:to_s).join(',')
+          OpenSSL::HMAC.digest(
+            @digest_func,
+            @secret_key,
+            args.map(&:to_s).join(','),
+          ),
         )
-      }
+      end
     end
   end
 end

@@ -42,7 +42,7 @@ module Kanoko
 
         def auto_orient
           [
-            '-auto-orient'
+            '-auto-orient',
           ]
         end
 

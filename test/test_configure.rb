@@ -8,15 +8,15 @@ class TestKanokoConfigure < Minitest::Test
   def test_hash_proc_by_default_error
     @config.digest_func = nil
     @config.secret_key = nil
-    assert_raises(Kanoko::ConfigureError){ @config.hash_proc.call }
+    assert_raises(Kanoko::ConfigureError) { @config.hash_proc.call }
 
     @config.digest_func = "sha1"
     @config.secret_key = nil
-    assert_raises(Kanoko::ConfigureError){ @config.hash_proc.call }
+    assert_raises(Kanoko::ConfigureError) { @config.hash_proc.call }
 
     @config.digest_func = nil
     @config.secret_key = "test"
-    assert_raises(Kanoko::ConfigureError){ @config.hash_proc.call }
+    assert_raises(Kanoko::ConfigureError) { @config.hash_proc.call }
   end
 
   def test_hash_proc_by_default
