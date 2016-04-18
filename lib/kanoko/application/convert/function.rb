@@ -45,6 +45,12 @@ module Kanoko
             '-auto-orient'
           ]
         end
+
+        def strip
+          [
+            '-strip',
+          ]
+        end
       end
     end
   end
