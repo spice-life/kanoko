@@ -30,13 +30,23 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert_equal expected_exif.to_hash, actual_exif.to_hash
   end
 
+  def assert_identify(expected_path, actual_blob)
+    expected = `identify #{expected_path}`.split(/\s+/)[1..-3]
+    actual = Tempfile.create("actual") do |f|
+      f.write actual_blob
+      f.close
+      `identify #{f.path}`.split(/\s+/)[1..-3]
+    end
+    assert_equal expected, actual
+  end
+
   def test_resize
     path = Kanoko.path_for(:resize, "10x10", "src.jpg")
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/jpeg'
-    assert_jpeg File.read("test/resize.jpg"), last_response.body
+    assert_identify "test/resize.jpg", last_response.body
   end
 
   def test_resize_and_crop
@@ -45,7 +55,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert last_response.ok?
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/jpeg'
-    assert_jpeg File.read("test/resize_and_crop.jpg"), last_response.body
+    assert_identify "test/resize_and_crop.jpg", last_response.body
   end
 
   def test_escaped_url
@@ -57,7 +67,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert last_response.ok?
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/jpeg'
-    assert_jpeg File.read("test/resize_and_crop.jpg"), last_response.body
+    assert_identify "test/resize_and_crop.jpg", last_response.body
   end
 
   def test_auto_orient
@@ -66,7 +76,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert last_response.ok?
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/jpeg'
-    assert_jpeg File.read("test/src.jpg"), last_response.body
+    assert_identify "test/auto-orient.jpg", last_response.body
   end
 
   def test_resize_and_auto_orient
@@ -75,7 +85,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert last_response.ok?
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/jpeg'
-    assert_jpeg File.read("test/resize.jpg"), last_response.body
+    assert_identify "test/resize.jpg", last_response.body
   end
 
   def test_to_another_ext
@@ -84,7 +94,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert last_response.ok?
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/png'
-    assert File.open("test/to.png", 'rb') { |f| f.read } == last_response.body.b
+    assert_identify "test/to.png", last_response.body
   end
 
   def test_undefined_func
