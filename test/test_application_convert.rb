@@ -4,11 +4,11 @@ class TestKanokoApplicationConvert < Minitest::Test
   include Rack::Test::Methods
 
   class TestApp < Kanoko::Application::Convert
-    class ResponseMock < Struct.new(:body)
+    class ResponseMock < Struct.new(:body, :content_type)
     end
     def http_get(uri)
       path = uri.to_s[7..-1] # 7 = 'http://'
-      ResponseMock.new(File.read "test/#{URI.decode_www_form_component(path)}")
+      ResponseMock.new(File.read("test/#{URI.decode_www_form_component(path)}"), "image/jpeg")
     end
     def after_response(res)
     end
@@ -34,6 +34,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length
+    assert last_response.content_type == 'image/jpeg'
     assert_jpeg File.read("test/resize.jpg"), last_response.body
   end
 
@@ -42,6 +43,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length
+    assert last_response.content_type == 'image/jpeg'
     assert_jpeg File.read("test/resize_and_crop.jpg"), last_response.body
   end
 
@@ -53,6 +55,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length
+    assert last_response.content_type == 'image/jpeg'
     assert_jpeg File.read("test/resize_and_crop.jpg"), last_response.body
   end
 
@@ -61,6 +64,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length
+    assert last_response.content_type == 'image/jpeg'
     assert_jpeg File.read("test/src.jpg"), last_response.body
   end
 
@@ -69,7 +73,17 @@ class TestKanokoApplicationConvert < Minitest::Test
     get path
     assert last_response.ok?
     assert 0 < last_response.body.length
+    assert last_response.content_type == 'image/jpeg'
     assert_jpeg File.read("test/resize.jpg"), last_response.body
+  end
+
+  def test_to_another_ext
+    path = Kanoko.path_for(:to, 'png', :strip, "src.jpg")
+    get path
+    assert last_response.ok?
+    assert 0 < last_response.body.length
+    assert last_response.content_type == 'image/png'
+    assert File.open("test/to.png", 'rb') { |f| f.read } == last_response.body.b
   end
 
   def test_undefined_func

@@ -2,6 +2,7 @@ require 'sinatra'
 require 'net/http'
 require 'tempfile'
 require 'kanoko'
+require 'mime/types'
 
 # This is an experimental implementation.
 # You can set configure and other.
@@ -33,6 +34,18 @@ module Kanoko
     class Convert < Sinatra::Application
       require 'kanoko/application/convert/function'
 
+      IMAGE_TYPES = MIME::Types.select { |m|
+        m.media_type == 'image'
+      }
+      TYPE_MAP = IMAGE_TYPES.map { |i|
+        [i.to_s, i.preferred_extension]
+      }.to_h
+      EXT_MAP = IMAGE_TYPES.each_with_object({}) { |i, h|
+        i.extensions.each { |ext|
+          h[ext] = i.to_s
+        }
+      }
+
       # /123abc456def=/resize/200x200/crop/100x100/path/to/src
       get '/:hash/*' do
         # REQUEST_URI dependent on unicorn.
@@ -48,9 +61,12 @@ module Kanoko
         list = Kanoko::Application::Convert::Function.list
         convert_options = []
         arguments = []
-
+        to_ext = File.extname(request_params.last)[1..-1]
         while id = request_params.shift.to_sym
-          if list.include?(id)
+          if id == :to
+            to_ext = request_params.shift
+            arguments << id << to_ext
+          elsif list.include?(id)
             arguments << id
             method = Function.new.method(id)
             arg = request_params.shift(method.arity)
@@ -80,14 +96,26 @@ module Kanoko
           src_file.write res.body
           src_file.fdatasync
 
-          Tempfile.create("dst") do |dst_file|
+          t = TYPE_MAP[res.content_type]
+          src_type = if t
+                       "#{t}:"
+                     else
+                       ""
+                     end
+
+          dst_name = if to_ext.nil?
+                       "dst"
+                     else
+                       ["dst", ".#{to_ext}"]
+                     end
+          Tempfile.create(dst_name) do |dst_file|
             system_command = [
               {"OMP_NUM_THREADS" => "1"},
               'convert',
               '-depth', '8',
               convert_options,
-              src_file.path,
-              dst_file.path
+              "#{src_type}#{src_file.path}",
+              dst_file.path,
             ].flatten
             result = system *system_command
 
@@ -96,6 +124,7 @@ module Kanoko
               return 500
             end
 
+            content_type EXT_MAP[to_ext]
             dst_file.read
           end
         end
