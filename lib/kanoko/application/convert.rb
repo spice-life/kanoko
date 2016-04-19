@@ -101,13 +101,14 @@ module Kanoko
             "#{t}:"
           else
             ""
-                     end
+          end
 
           dst_name = if to_ext.nil?
             "dst"
           else
             ["dst", ".#{to_ext}"]
-                     end
+          end
+
           Tempfile.create(dst_name) do |dst_file|
             system_command = [
               { "OMP_NUM_THREADS" => "1" },
