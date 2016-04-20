@@ -8,6 +8,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     end
     def http_get(uri)
       path = uri.to_s[7..-1] # 7 = 'http://'
+      path.sub!(/\?.*/, '')
       ResponseMock.new(File.read("test/#{URI.decode_www_form_component(path)}"), "image/jpeg")
     end
 
@@ -93,6 +94,14 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/png'
     assert_identify "-strip", last_response.body, to: "png:"
+  end
+
+  def test_with_query
+    path = Kanoko.path_for(:resize, "12x13", "src.jpg?v=123")
+    get path
+    assert last_response.ok?
+    assert 0 < last_response.body.length
+    assert last_response.content_type == 'image/jpeg'
   end
 
   def test_undefined_func

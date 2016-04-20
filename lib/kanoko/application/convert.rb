@@ -45,12 +45,17 @@ module Kanoko
           h[ext] = i.to_s
         end
       end
+      QUERY_REGEXP = /\?.*/
 
       # /123abc456def=/resize/200x200/crop/100x100/path/to/src
       get '/:hash/*' do
         # REQUEST_URI dependent on unicorn.
         # request.path should be use only testing
-        raw_request_uri = env["REQUEST_URI"] || request.path
+        raw_request_uri = if env["REQUEST_URI"]
+                            env["REQUEST_URI"]
+                          else
+                            "#{request.path}#{request.params.empty? ? "" : "?#{request.query_string}"}"
+                          end
         request_params = raw_request_uri.split('/').tap(&:shift)
         hash = request_params.shift
         unless 0 < request_params.length
@@ -61,7 +66,7 @@ module Kanoko
         list = Kanoko::Application::Convert::Function.list
         convert_options = []
         arguments = []
-        to_ext = File.extname(request_params.last)[1..-1]
+        to_ext = File.extname(request_params.last).sub(QUERY_REGEXP, '')[1..-1]
         while id = request_params.shift.to_sym
           if id == :to
             to_ext = request_params.shift
