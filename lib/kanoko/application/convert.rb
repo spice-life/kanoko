@@ -115,16 +115,11 @@ module Kanoko
           end
 
           Tempfile.create(dst_name) do |dst_file|
-            system_command = [
-              { "OMP_NUM_THREADS" => "1" },
-              'convert',
-              '-depth', '8',
-              '-background', 'none',
+            result = system *system_command(
               convert_options,
               "#{src_type}#{src_file.path}",
               dst_file.path,
-            ].flatten
-            result = system *system_command
+            )
 
             unless result
               logger.error "command fail $?=#{$CHILD_STATUS.inspect}"
@@ -138,6 +133,18 @@ module Kanoko
       end
 
       private
+
+      def system_command(options, src_path, dst_path)
+        [
+          { "OMP_NUM_THREADS" => "1" },
+          'convert',
+          '-depth', '8',
+          '-background', 'none',
+          options,
+          src_path,
+          dst_path,
+        ].flatten
+      end
 
       def http_get(uri)
         retries = 2
