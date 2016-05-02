@@ -93,7 +93,7 @@ class TestKanokoApplicationConvert < Minitest::Test
     assert last_response.ok?
     assert 0 < last_response.body.length
     assert last_response.content_type == 'image/png'
-    assert_identify "-strip", last_response.body, to: "png:"
+    assert_identify "-strip -background none", last_response.body, to: "png:"
   end
 
   def test_with_query

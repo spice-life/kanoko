@@ -119,6 +119,7 @@ module Kanoko
               { "OMP_NUM_THREADS" => "1" },
               'convert',
               '-depth', '8',
+              '-background', 'none',
               convert_options,
               "#{src_type}#{src_file.path}",
               dst_file.path,
