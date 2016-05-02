@@ -59,7 +59,7 @@ module Kanoko
         request_params = raw_request_uri.split('/').tap(&:shift)
         hash = request_params.shift
         unless 0 < request_params.length
-          logger.error "invalid url #{request_uri}"
+          logger.error "invalid url #{raw_request_uri}"
           return 400
         end
 
