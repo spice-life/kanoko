@@ -6,7 +6,7 @@ class TestKanokoApplicationConvert < Minitest::Test
   class TestApp < Kanoko::Application::Convert
     class ResponseMock < Struct.new(:body, :content_type)
     end
-    def http_get(uri)
+    def http_get(uri, headers)
       path = uri.to_s[7..-1] # 7 = 'http://'
       path.sub!(/\?.*/, '')
       ResponseMock.new(File.read("test/#{URI.decode_www_form_component(path)}"), "image/jpeg")
