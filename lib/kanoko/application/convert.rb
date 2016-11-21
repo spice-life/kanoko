@@ -57,6 +57,7 @@ module Kanoko
                             "#{request.path}#{request.params.empty? ? "" : "?#{request.query_string}"}"
                           end
         request_params = raw_request_uri.split('/').tap(&:shift)
+        request_headers = request.env.select { |k, v| k.start_with?("HTTP_") }
         hash = request_params.shift
         unless 0 < request_params.length
           logger.error "invalid url #{raw_request_uri}"
@@ -89,9 +90,8 @@ module Kanoko
           logger.error "hash check failed #{[*arguments, check_path]}"
           return 400
         end
-
         src_path = request_params.join('/')
-        res = http_get(URI.parse("#{(request.secure? ? 'https' : 'http')}://#{src_path}"))
+        res = http_get(URI.parse("#{(request.secure? ? 'https' : 'http')}://#{src_path}"), request_headers)
         if res.nil?
           return 404
         end
@@ -146,9 +146,17 @@ module Kanoko
         ].flatten
       end
 
-      def http_get(uri)
+      def http_get(uri, headers)
         retries = 2
         req = Net::HTTP::Get.new(uri.request_uri)
+        headers.each do |key, value|
+          case key
+          when "HTTP_HOST"
+            next
+          end
+          k = key.sub(/^HTTP_/, '')
+          req[k] = value if !req[k]
+        end
         http = Net::HTTP.new(uri.host, uri.port)
         http.read_timeout = 1
         http.use_ssl = true if uri.scheme == 'https'
